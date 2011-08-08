@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?><plug-in>
+    <!-- Plugin Informations -->
+    <name>crm-userws</name>
+    <class>fr.paris.lutece.plugins.userws.service.UserWSPlugin</class>
+    <version>1.0.0</version>
+    <documentation/>
+    <installation/>
+    <changes/>
+    <user-guide/>
+    <description>userws.plugin.description</description>
+    <provider>userws.plugin.provider</provider>
+    <provider-url>http://lutece.paris.fr</provider-url>
+    <icon-url>images/admin/skin/plugins/userws/userws.png</icon-url>
+    <copyright>Copyright 2001-2011 Mairie de Paris</copyright>
+    <core-version-dependency>
+        <min-core-version>3.0.0</min-core-version>
+        <max-core-version/>
+    </core-version-dependency>
+    <db-pool-required>0</db-pool-required>
+
+</plug-in>
