@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+    <properties>
+        <title>Configuration</title>
+    </properties>
+    <body>
+        <section name="Installation">
+			<p>
+				Configurer l'URL de la webapp contenant les informations des utilisateurs, nottament la webapp ayant un 
+				<strong>plugin-mylutece</strong>, dans le fichier <strong>userws.properties</strong> :
+			</p>
+			<div class="source">
+<pre>
+    userws.rest.userAttribute.webapp.url=<strong>http://localhost:8080/lutece/rest/crm/user/</strong>
+</pre>
+			</div>
+			<p>
+				Configurer les cl&#233;s priv&#233;es utilis&#233;es pour les signatures dans le fichier <strong>userws_context.xml</strong> :     
+			</p>
+			<div class="source">
+<pre>
+&lt;bean id="userws.hashService" class="fr.paris.lutece.util.signrequest.security.Sha1HashService" /&gt;
+&lt;bean id="userws.userAttributesRequestAuthenticator" class="fr.paris.lutece.util.signrequest.HeaderHashAuthenticator" &gt;
+	&lt;property name="hashService" ref="userws.hashService" /&gt;
+       &lt;property name="signatureElements" &gt; 
+           &lt;list&gt;
+           &lt;/list&gt;
+       &lt;/property&gt;
+       &lt;property name="privateKey"&gt;
+           &lt;value&gt;change me&lt;/value&gt;
+       &lt;/property&gt;
+ &lt;/bean&gt;
+</pre>
+			</div>
+        </section>
+    </body>
+</document>

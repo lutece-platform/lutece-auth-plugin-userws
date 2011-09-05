@@ -1,12 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document>
-	<properties>
-		<title>Plugin</title>
-	</properties>
-	<body>
-		<section name="Plugin">
-			<subsection name="Introduction">
-			</subsection>
-		</section>
-	</body>
+    <properties>
+        <title>Introduction</title>
+    </properties>
+    <body>
+        <section name="Plugin's description">
+            <subsection name="Introduction">
+                <p>
+                	This plugin handles the retrieval of user's information from another webapp by WebService.
+                </p>
+            </subsection>
+        </section>
+    </body>
 </document>
