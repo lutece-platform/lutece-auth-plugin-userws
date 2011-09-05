@@ -36,10 +36,14 @@ package fr.paris.lutece.plugins.userws.util.http;
 import fr.paris.lutece.portal.service.util.AppLogService;
 import fr.paris.lutece.util.httpaccess.HttpAccess;
 import fr.paris.lutece.util.httpaccess.HttpAccessException;
+import fr.paris.lutece.util.signrequest.HeaderHashAuthenticator;
+import fr.paris.lutece.util.signrequest.NoSecurityAuthenticator;
 import fr.paris.lutece.util.signrequest.RequestAuthenticator;
+import fr.paris.lutece.util.signrequest.RequestHashAuthenticator;
 
 import org.apache.commons.lang.StringUtils;
 
+import java.util.Date;
 import java.util.List;
 
 
@@ -48,12 +52,12 @@ import java.util.List;
  * WebServiceCaller
  *
  */
-public final class WebServiceCaller
+public class WebServiceCaller implements IWebServiceCaller
 {
     /**
      * Private constructor
      */
-    private WebServiceCaller(  )
+    protected WebServiceCaller(  )
     {
     }
 
@@ -65,10 +69,15 @@ public final class WebServiceCaller
     * @return the response as a string
     * @throws HttpAccessException the exception if there is a problem
     */
-    public static String callWebService( String strUrl, RequestAuthenticator authenticator, List<String> listElements )
+    public String callWebService( String strUrl, RequestAuthenticator authenticator, List<String> listElements )
         throws HttpAccessException
     {
         String strResponse = StringUtils.EMPTY;
+
+        if ( AppLogService.isDebugEnabled(  ) )
+        {
+            AppLogService.debug( trace( strUrl, authenticator, listElements ) );
+        }
 
         try
         {
@@ -83,5 +92,58 @@ public final class WebServiceCaller
         }
 
         return strResponse;
+    }
+
+    /**
+     * Trace the web service caller
+     * @param strUrl the url
+     * @param authenticator the request authenticator
+     * @param listElements the list of elements to include in the signature
+     * @return the trace
+     */
+    public String trace( String strUrl, RequestAuthenticator authenticator, List<String> listElements )
+    {
+        StringBuilder sbTrace = new StringBuilder(  );
+        sbTrace.append( "\n ---------------------- User Attribute WebService Call -------------------" );
+        sbTrace.append( "\nWebService URL : " ).append( strUrl );
+
+        sbTrace.append( "\nSecurity : " );
+        sbTrace.append( "\nValues used for the request signature : " );
+
+        for ( String strValue : listElements )
+        {
+            sbTrace.append( "\n   " ).append( strValue );
+        }
+
+        if ( authenticator instanceof RequestHashAuthenticator )
+        {
+            RequestHashAuthenticator auth = (RequestHashAuthenticator) authenticator;
+            String strTimestamp = Long.toString( new Date(  ).getTime(  ) );
+            String strSignature = auth.buildSignature( listElements, strTimestamp );
+            sbTrace.append( "\n Request Authenticator : RequestHashAuthenticator" );
+            sbTrace.append( "\n Timestamp sample : " ).append( strTimestamp );
+            sbTrace.append( "\n Signature for this timestamp : " ).append( strSignature );
+        }
+        else if ( authenticator instanceof HeaderHashAuthenticator )
+        {
+            HeaderHashAuthenticator auth = (HeaderHashAuthenticator) authenticator;
+            String strTimestamp = Long.toString( new Date(  ).getTime(  ) );
+            String strSignature = auth.buildSignature( listElements, strTimestamp );
+            sbTrace.append( "\n Request Authenticator : HeaderHashAuthenticator" );
+            sbTrace.append( "\n Timestamp sample : " ).append( strTimestamp );
+            sbTrace.append( "\n Signature for this timestamp : " ).append( strSignature );
+        }
+        else if ( authenticator instanceof NoSecurityAuthenticator )
+        {
+            sbTrace.append( "\n No request authentification" );
+        }
+        else
+        {
+            sbTrace.append( "\n Unknown Request authenticator" );
+        }
+
+        sbTrace.append( "\n --------------------------------------------------------------------" );
+
+        return sbTrace.toString(  );
     }
 }

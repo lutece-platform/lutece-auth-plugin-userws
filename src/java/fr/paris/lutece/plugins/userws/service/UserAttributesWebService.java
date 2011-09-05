@@ -34,7 +34,7 @@
 package fr.paris.lutece.plugins.userws.service;
 
 import fr.paris.lutece.plugins.userws.service.signrequest.UserAttributesRequestAuthenticatorService;
-import fr.paris.lutece.plugins.userws.util.http.WebServiceCaller;
+import fr.paris.lutece.plugins.userws.util.http.IWebServiceCaller;
 import fr.paris.lutece.portal.service.security.UserAttributesService;
 import fr.paris.lutece.portal.service.util.AppException;
 import fr.paris.lutece.portal.service.util.AppPropertiesService;
@@ -57,7 +57,7 @@ import java.util.Map;
  * UserAttributesWebService
  *
  */
-public final class UserAttributesWebService implements UserAttributesService
+public class UserAttributesWebService implements UserAttributesService
 {
     // CONSTANTS
     private static final String JSON_EXTENSION = ".json";
@@ -76,11 +76,23 @@ public final class UserAttributesWebService implements UserAttributesService
     // PARAMETERS
     private static final String PARAMETER_USER_GUID = "user_guid";
 
+    // VARIABLES
+    private IWebServiceCaller _webServiceCaller;
+
     /**
      * Private constructor
      */
-    private UserAttributesWebService(  )
+    public UserAttributesWebService(  )
     {
+    }
+
+    /**
+     * Set the web service caller
+     * @param webServiceCaller the web service caller
+     */
+    public void setWebServiceCaller( IWebServiceCaller webServiceCaller )
+    {
+        _webServiceCaller = webServiceCaller;
     }
 
     /**
@@ -105,7 +117,7 @@ public final class UserAttributesWebService implements UserAttributesService
 
         try
         {
-            strJson = WebServiceCaller.callWebService( sbRestUrl.toString(  ),
+            strJson = _webServiceCaller.callWebService( sbRestUrl.toString(  ),
                     UserAttributesRequestAuthenticatorService.getRequestAuthenticator(  ), listElements );
 
             JSONObject jsonAttributes = (JSONObject) JSONSerializer.toJSON( strJson );
@@ -149,7 +161,7 @@ public final class UserAttributesWebService implements UserAttributesService
 
         try
         {
-            strUserAttribute = WebServiceCaller.callWebService( sbRestUrl.toString(  ),
+            strUserAttribute = _webServiceCaller.callWebService( sbRestUrl.toString(  ),
                     UserAttributesRequestAuthenticatorService.getRequestAuthenticator(  ), listElements );
         }
         catch ( HttpAccessException e )

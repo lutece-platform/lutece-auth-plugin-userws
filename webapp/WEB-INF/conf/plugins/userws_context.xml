@@ -3,7 +3,10 @@
 
 <beans>
     <!-- WebService -->
-    <bean id="userws.userAttributesWebService" class="fr.paris.lutece.plugins.userws.service.UserAttributesWebService" />
+    <bean id="userws.webServiceCaller" class="fr.paris.lutece.plugins.userws.util.http.WebServiceCaller" />
+    <bean id="userws.userAttributesWebService" class="fr.paris.lutece.plugins.userws.service.UserAttributesWebService">
+    	<property name="webServiceCaller" ref="userws.webServiceCaller" />
+    </bean>
     
     <!-- SignRequest -->
 	  <bean id="userws.hashService" class="fr.paris.lutece.util.signrequest.security.Sha1HashService" />
