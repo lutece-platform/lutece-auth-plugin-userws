@@ -9,8 +9,8 @@
 			<item name="Configuration" href="configuration.html" />
 		</menu>
 		<menu name="Downloads" inherit="bottom">
-			<item name="Released versions" href="../../stable_builds/plugins/module-formengine-outputws/"/>
-			<item name="Nightly builds" href="../../nightly_builds/plugins/module-formengine-outputws/" />
+			<item name="Released versions" href="../../stable_builds/plugins/plugin-userws/"/>
+			<item name="Nightly builds" href="../../nightly_builds/plugins/plugin-userws/" />
 		</menu>
 		<menu ref="reports" />
 	</body>
