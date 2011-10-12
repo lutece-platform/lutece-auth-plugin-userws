@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1" standalone="no"?><plug-in>
     <!-- Plugin Informations -->
-    <name>crm-userws</name>
+    <name>userws</name>
     <class>fr.paris.lutece.plugins.userws.service.UserWSPlugin</class>
     <version>1.0.0</version>
     <documentation/>

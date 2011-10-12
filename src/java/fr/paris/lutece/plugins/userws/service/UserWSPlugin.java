@@ -43,7 +43,7 @@ import fr.paris.lutece.portal.service.plugin.PluginDefaultImplementation;
  */
 public class UserWSPlugin extends PluginDefaultImplementation
 {
-    public static final String PLUGIN_NAME = "cmr-userws";
+    public static final String PLUGIN_NAME = "userws";
 
     /**
      * Init plugin
