@@ -33,18 +33,23 @@
  */
 package fr.paris.lutece.plugins.userws.service;
 
-import fr.paris.lutece.plugins.userws.service.signrequest.UserAttributesRequestAuthenticatorService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import fr.paris.lutece.plugins.userws.util.http.IWebServiceCaller;
 import fr.paris.lutece.portal.service.security.UserAttributesService;
 import fr.paris.lutece.portal.service.util.AppException;
-import fr.paris.lutece.portal.service.util.AppPropertiesService;
 import fr.paris.lutece.util.httpaccess.HttpAccessException;
+import fr.paris.lutece.util.signrequest.RequestAuthenticator;
 
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
-import net.sf.json.JSONSerializer;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
-import org.apache.commons.lang.StringUtils;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -57,8 +62,12 @@ import java.util.Map;
  * UserAttributesWebService
  *
  */
+@ApplicationScoped
+@Named( UserAttributesWebService.BEAN_NAME )
 public class UserAttributesWebService implements UserAttributesService
 {
+    public static final String BEAN_NAME = "userws.userAttributesWebService";
+
     // CONSTANTS
     private static final String JSON_EXTENSION = ".json";
     private static final String SLASH = "/";
@@ -70,21 +79,23 @@ public class UserAttributesWebService implements UserAttributesService
     private static final String TAG_USER_ATTRIBUTE_KEY = "user-attribute-key";
     private static final String TAG_USER_ATTRIBUTE_VALUE = "user-attribute-value";
 
-    // PROPERTIES
-    private static final String PROPERTY_REST_USER_ATTRIBUTE_WEBAPP_URL = "userws.rest.userAttribute.webapp.url";
-
     // PARAMETERS
     private static final String PARAMETER_USER_GUID = "user_guid";
 
+    private static final ObjectMapper MAPPER = new ObjectMapper( );
+
     // VARIABLES
+    @Inject
+    @ConfigProperty( name = "userws.rest.userAttribute.webapp.url" )
+    private String _strWebappUrl;
+
+    @Inject
+    @Named( "userws.webServiceCaller" )
     private IWebServiceCaller _webServiceCaller;
 
-    /**
-     * Private constructor
-     */
-    public UserAttributesWebService(  )
-    {
-    }
+    @Inject
+    @Named( UserAttributesRequestAuthenticatorProducer.BEAN_NAME )
+    private RequestAuthenticator _requestAuthenticator;
 
     /**
      * Set the web service caller
@@ -93,6 +104,24 @@ public class UserAttributesWebService implements UserAttributesService
     public void setWebServiceCaller( IWebServiceCaller webServiceCaller )
     {
         _webServiceCaller = webServiceCaller;
+    }
+
+    /**
+     * Set the URL of the user attributes web service
+     * @param strWebappUrl the URL, ending with a slash
+     */
+    public void setWebappUrl( String strWebappUrl )
+    {
+        _strWebappUrl = strWebappUrl;
+    }
+
+    /**
+     * Set the request authenticator
+     * @param requestAuthenticator the request authenticator
+     */
+    public void setRequestAuthenticator( RequestAuthenticator requestAuthenticator )
+    {
+        _requestAuthenticator = requestAuthenticator;
     }
 
     /**
@@ -105,7 +134,7 @@ public class UserAttributesWebService implements UserAttributesService
         Map<String, String> mapUserAttributes = new HashMap<String, String>(  );
 
         StringBuilder sbRestUrl = new StringBuilder(  );
-        sbRestUrl.append( AppPropertiesService.getProperty( PROPERTY_REST_USER_ATTRIBUTE_WEBAPP_URL ) );
+        sbRestUrl.append( _strWebappUrl );
         sbRestUrl.append( strUserGuid );
         sbRestUrl.append( JSON_EXTENSION );
         sbRestUrl.append( QUESTION_MARK + PARAMETER_USER_GUID + EQUAL + strUserGuid );
@@ -117,21 +146,18 @@ public class UserAttributesWebService implements UserAttributesService
 
         try
         {
-            strJson = _webServiceCaller.callWebService( sbRestUrl.toString(  ),
-                    UserAttributesRequestAuthenticatorService.getRequestAuthenticator(  ), listElements );
+            strJson = _webServiceCaller.callWebService( sbRestUrl.toString(  ), _requestAuthenticator, listElements );
 
-            JSONObject jsonAttributes = (JSONObject) JSONSerializer.toJSON( strJson );
-            JSONArray jsonArray = jsonAttributes.getJSONArray( TAG_USER_ATTRIBUTES );
+            JsonNode jsonAttributes = MAPPER.readTree( strJson );
 
-            for ( int i = 0; i < jsonArray.size(  ); i++ )
+            for ( JsonNode jsonAttribute : jsonAttributes.path( TAG_USER_ATTRIBUTES ) )
             {
-                JSONObject jsonAttribute = jsonArray.getJSONObject( i );
-                String strKey = jsonAttribute.getString( TAG_USER_ATTRIBUTE_KEY );
-                String strValue = jsonAttribute.getString( TAG_USER_ATTRIBUTE_VALUE );
+                String strKey = jsonAttribute.path( TAG_USER_ATTRIBUTE_KEY ).asText( );
+                String strValue = jsonAttribute.path( TAG_USER_ATTRIBUTE_VALUE ).asText( );
                 mapUserAttributes.put( strKey, strValue );
             }
         }
-        catch ( HttpAccessException e )
+        catch ( HttpAccessException | JsonProcessingException e )
         {
             throw new AppException( e.getMessage(  ), e );
         }
@@ -150,7 +176,7 @@ public class UserAttributesWebService implements UserAttributesService
         String strUserAttribute = StringUtils.EMPTY;
 
         StringBuilder sbRestUrl = new StringBuilder(  );
-        sbRestUrl.append( AppPropertiesService.getProperty( PROPERTY_REST_USER_ATTRIBUTE_WEBAPP_URL ) );
+        sbRestUrl.append( _strWebappUrl );
         sbRestUrl.append( strUserGuid );
         sbRestUrl.append( SLASH );
         sbRestUrl.append( strAttributeKey );
@@ -161,8 +187,7 @@ public class UserAttributesWebService implements UserAttributesService
 
         try
         {
-            strUserAttribute = _webServiceCaller.callWebService( sbRestUrl.toString(  ),
-                    UserAttributesRequestAuthenticatorService.getRequestAuthenticator(  ), listElements );
+            strUserAttribute = _webServiceCaller.callWebService( sbRestUrl.toString(  ), _requestAuthenticator, listElements );
         }
         catch ( HttpAccessException e )
         {

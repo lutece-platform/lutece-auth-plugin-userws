@@ -15,21 +15,16 @@
 </pre>
 			</div>
 			<p>
-				Configurer les cl&#233;s priv&#233;es utilis&#233;es pour les signatures dans le fichier <strong>userws_context.xml</strong> :     
+				Configurer la signature des requ&#234;tes dans le fichier <strong>userws.properties</strong> (&#224; surcharger dans le site) :
 			</p>
 			<div class="source">
 <pre>
-&lt;bean id="userws.hashService" class="fr.paris.lutece.util.signrequest.security.Sha1HashService" /&gt;
-&lt;bean id="userws.userAttributesRequestAuthenticator" class="fr.paris.lutece.util.signrequest.HeaderHashAuthenticator" &gt;
-	&lt;property name="hashService" ref="userws.hashService" /&gt;
-       &lt;property name="signatureElements" &gt; 
-           &lt;list&gt;
-           &lt;/list&gt;
-       &lt;/property&gt;
-       &lt;property name="privateKey"&gt;
-           &lt;value&gt;change me&lt;/value&gt;
-       &lt;/property&gt;
- &lt;/bean&gt;
+# signrequest.HeaderHashAuthenticator, signrequest.RequestHashAuthenticator, ...
+userws.userAttributesRequestAuthenticator.name=signrequest.HeaderHashAuthenticator
+userws.userAttributesRequestAuthenticator.cfg.privateKey=<strong>change me</strong>
+# optional: hash service bean (default signrequest.Sha1HashService) and signed request parameters
+userws.userAttributesRequestAuthenticator.cfg.hashService=signrequest.Sha1HashService
+userws.userAttributesRequestAuthenticator.cfg.signatureElements=
 </pre>
 			</div>
         </section>

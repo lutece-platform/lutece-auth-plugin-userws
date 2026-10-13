@@ -33,10 +33,19 @@
  */
 package fr.paris.lutece.plugins.userws.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import fr.paris.lutece.plugins.userws.util.http.MokeWebServiceCaller;
 import fr.paris.lutece.portal.service.security.LuteceUser;
 import fr.paris.lutece.test.LuteceTestCase;
+import fr.paris.lutece.util.signrequest.HeaderHashAuthenticator;
+import fr.paris.lutece.util.signrequest.RequestAuthenticator;
+import fr.paris.lutece.util.signrequest.security.Sha1HashService;
 
+import org.junit.jupiter.api.Test;
+
+import java.util.ArrayList;
 import java.util.Map;
 
 
@@ -48,31 +57,37 @@ import java.util.Map;
 public class UserAttributesWebServiceTest extends LuteceTestCase
 {
     private static final String USER_GUID = "USER_1";
+    private static final String WEBAPP_URL = "http://localhost/userws/";
+
+    private final RequestAuthenticator _requestAuthenticator = new HeaderHashAuthenticator( new Sha1HashService( ), new ArrayList<>( ), "change me" );
 
     /**
      * Test of getAttributes method of fr.paris.lutece.plugins.userws.service.UserAttributesWebService
      */
+    @Test
     public void testGetAttributes(  )
     {
-        System.out.println( "getAttributes" );
-
         UserAttributesWebService instance = new UserAttributesWebService(  );
         instance.setWebServiceCaller( new MokeWebServiceCaller(  ) );
+        instance.setRequestAuthenticator( _requestAuthenticator );
+        instance.setWebappUrl( WEBAPP_URL );
 
-        Map<String, String> listAttributes = instance.getAttributes( USER_GUID );
+        Map<String, String> mapAttributes = instance.getAttributes( USER_GUID );
 
-        assertNotNull( listAttributes );
+        assertNotNull( mapAttributes );
+        assertEquals( USER_GUID, mapAttributes.get( LuteceUser.NAME_GIVEN ) );
     }
 
     /**
      * Test of getAttribute method of fr.paris.lutece.plugins.userws.service.UserAttributesWebService
      */
+    @Test
     public void testGetAttribute(  )
     {
-        System.out.println( "getAttributes" );
-
         UserAttributesWebService instance = new UserAttributesWebService(  );
         instance.setWebServiceCaller( new MokeWebServiceCaller(  ) );
+        instance.setRequestAuthenticator( _requestAuthenticator );
+        instance.setWebappUrl( WEBAPP_URL );
 
         String strLastName = instance.getAttribute( USER_GUID, LuteceUser.NAME_FAMILY );
 
