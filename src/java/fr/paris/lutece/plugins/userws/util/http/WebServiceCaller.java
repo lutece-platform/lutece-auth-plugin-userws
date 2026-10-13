@@ -41,10 +41,14 @@ import fr.paris.lutece.util.signrequest.NoSecurityAuthenticator;
 import fr.paris.lutece.util.signrequest.RequestAuthenticator;
 import fr.paris.lutece.util.signrequest.RequestHashAuthenticator;
 
-import org.apache.commons.lang.StringUtils;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Named;
+
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Date;
 import java.util.List;
+import java.util.function.Supplier;
 
 
 /**
@@ -52,10 +56,12 @@ import java.util.List;
  * WebServiceCaller
  *
  */
+@ApplicationScoped
+@Named( "userws.webServiceCaller" )
 public class WebServiceCaller implements IWebServiceCaller
 {
     /**
-     * Private constructor
+     * Constructor
      */
     protected WebServiceCaller(  )
     {
@@ -74,10 +80,7 @@ public class WebServiceCaller implements IWebServiceCaller
     {
         String strResponse = StringUtils.EMPTY;
 
-        if ( AppLogService.isDebugEnabled(  ) )
-        {
-            AppLogService.debug( trace( strUrl, authenticator, listElements ) );
-        }
+        AppLogService.getLogger( ).debug( "{}", (Supplier<String>) ( ) -> trace( strUrl, authenticator, listElements ) );
 
         try
         {
@@ -86,9 +89,8 @@ public class WebServiceCaller implements IWebServiceCaller
         }
         catch ( HttpAccessException e )
         {
-            String strError = "Error connecting to '" + strUrl + "' : ";
-            AppLogService.error( strError + e.getMessage(  ), e );
-            throw new HttpAccessException( strError, e );
+            AppLogService.getLogger( ).error( "Error connecting to '{}' : {}", strUrl, e.getMessage( ), e );
+            throw new HttpAccessException( "Error connecting to '" + strUrl + "' : ", e );
         }
 
         return strResponse;
